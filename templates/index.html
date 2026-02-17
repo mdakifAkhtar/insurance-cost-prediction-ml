@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsureAI | Health Insurance Predictor</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #243B55, #141E30);
+    color: white;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.header p {
+    opacity: 0.8;
+    font-size: 18px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+label {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+input, select {
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus, select:focus {
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 10px rgba(0,255,255,0.5);
+}
+
+.tooltip {
+    position: absolute;
+    right: 10px;
+    top: 0;
+    font-size: 15px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.tooltip:hover::after {
+    content: attr(data-info);
+    position: absolute;
+    right: 0;
+    top: 25px;
+    width: 220px;
+    background: #3b3939;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #1be6bd;
+    box-shadow: 0 0 10px rgba(0,255,255,0.5);
+}
+
+button {
+    margin-top: 40px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 50px;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.7);
+}
+
+button.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.result {
+    display: none;
+    margin-top: 30px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #00ffcc;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(0,255,255,0.08);
+}
+
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 13px;
+    opacity: 0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>💰 InsureAI</h1>
+        <p>AI Powered Health Insurance Cost Prediction</p>
+    </div>
+
+    <form action="/predict" method="post" onsubmit="showLoading()">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Age</label>
+                <span class="tooltip" data-info="Customer's age in years. Higher age may increase premium.">ℹ</span>
+                <input type="number" name="age" required>
+            </div>
+
+            <div class="form-group">
+                <label>Gender</label>
+                <span class="tooltip" data-info="Gender affects health risk and premium calculation.">ℹ</span>
+                <select name="is_female" required>
+                    <option value="0">Male</option>
+                    <option value="1">Female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>BMI</label>
+                <span class="tooltip" data-info="Body Mass Index. Higher BMI may increase insurance cost.">ℹ</span>
+                <input type="number" step="0.1" name="bmi" required>
+            </div>
+
+            <div class="form-group">
+                <label>Children</label>
+                <span class="tooltip" data-info="Number of dependents covered in the insurance plan.">ℹ</span>
+                <input type="number" name="children" required>
+            </div>
+
+            <div class="form-group">
+                <label>Smoker</label>
+                <span class="tooltip" data-info="Smoking increases health risk significantly.">ℹ</span>
+                <select name="is_smoker" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Region</label>
+                <span class="tooltip" data-info="Insurance costs vary depending on region.">ℹ</span>
+                <select name="region_southeast" required>
+                    <option value="0">Other</option>
+                    <option value="1">Southeast</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Obesity</label>
+                <span class="tooltip" data-info="Obesity increases risk of chronic diseases.">ℹ</span>
+                <select name="bmi_category_obesity" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+        </div>
+
+        <button id="predictBtn" type="submit">Analyze Insurance Cost</button>
+
+    </form>
+
+    <!-- Result Box -->
+    <div id="resultBox" class="result">
+        {{ prediction_text }}
+    </div>
+
+    <div class="footer">
+        ⚠ This tool provides estimation only and is not financial advice. <br>
+        © 2026 InsureAI | Developed by Mohammad Akif Akhtar
+    </div>
+
+</div>
+
+<script>
+function showLoading() {
+    const btn = document.getElementById("predictBtn");
+    btn.innerText = "Analyzing...";
+    btn.classList.add("loading");
+}
+
+// Hide result if page refreshed
+window.onload = function() {
+    if (!window.performance || performance.navigation.type === 1) {
+        document.getElementById("resultBox").style.display = "none";
+    } else {
+        const result = document.getElementById("resultBox");
+        if (result.innerText.trim() !== "") {
+            result.style.display = "block";
+        }
+    }
+};
+</script>
+
+</body>
+</html>
