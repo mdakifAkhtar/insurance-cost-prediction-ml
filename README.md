@@ -45,7 +45,10 @@ Random Forest was chosen because:
 	3.	Data is preprocessed.
 	4.	Trained Random Forest model predicts insurance cost.
 	5.	Predicted result is displayed on the webpage.
+	
+i. Pearson correlation analysis was performed to understand the linear relationship between independent variables and insurance charges. Smoking status showed the highest   positivecorrelation, indicating strong impact on medical expenses.
 
+ii. Chi-Square test of independence was applied to categorical features after binning the target variable into quartiles. Features with p-value < 0.05 were retained for model training.
 
 🔮 Future Improvements
 	•	Add model comparison (Linear Regression vs Random Forest)
